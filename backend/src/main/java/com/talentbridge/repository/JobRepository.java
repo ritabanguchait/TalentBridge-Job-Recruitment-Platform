@@ -40,6 +40,10 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     @Query("SELECT j FROM Job j JOIN FETCH j.recruiterProfile WHERE j.id = :id")
     Optional<Job> findByIdWithRecruiter(@Param("id") Long id);
 
+    @Query(value = "SELECT j FROM Job j JOIN FETCH j.recruiterProfile rp WHERE (:status IS NULL OR j.status = :status)",
+           countQuery = "SELECT COUNT(j) FROM Job j WHERE (:status IS NULL OR j.status = :status)")
+    Page<Job> findAllByOptionalStatus(@Param("status") JobStatus status, Pageable pageable);
+
     long countByRecruiterProfileId(Long recruiterProfileId);
 
     long countByRecruiterProfileIdAndStatus(Long recruiterProfileId, JobStatus status);

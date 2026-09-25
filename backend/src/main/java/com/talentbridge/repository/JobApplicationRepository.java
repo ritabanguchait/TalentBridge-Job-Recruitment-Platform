@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -56,6 +57,10 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
     long countByCandidateProfileId(Long candidateProfileId);
 
     long countByCandidateProfileIdAndStatus(Long candidateProfileId, ApplicationStatus status);
+
+    List<JobApplication> findByJobId(Long jobId);
+
+    void deleteByJobId(Long jobId);
 
     long countByJobId(Long jobId);
 
