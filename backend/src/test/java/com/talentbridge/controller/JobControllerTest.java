@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.talentbridge.dto.JobCreateRequest;
 import com.talentbridge.dto.LoginRequest;
 import com.talentbridge.entity.*;
-import com.talentbridge.repository.JobRepository;
-import com.talentbridge.repository.RecruiterProfileRepository;
-import com.talentbridge.repository.UserRepository;
+import com.talentbridge.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,12 +46,24 @@ class JobControllerTest {
     private JobRepository jobRepository;
 
     @Autowired
+    private JobApplicationRepository jobApplicationRepository;
+
+    @Autowired
+    private ApplicationStatusHistoryRepository historyRepository;
+
+    @Autowired
+    private CandidateProfileRepository candidateProfileRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
+        historyRepository.deleteAll();
+        jobApplicationRepository.deleteAll();
         jobRepository.deleteAll();
         recruiterProfileRepository.deleteAll();
+        candidateProfileRepository.deleteAll();
         userRepository.deleteAll();
 
         // Seed recruiter

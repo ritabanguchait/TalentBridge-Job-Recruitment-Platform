@@ -5,9 +5,7 @@ import com.talentbridge.dto.LoginRequest;
 import com.talentbridge.dto.RegisterRequest;
 import com.talentbridge.entity.Role;
 import com.talentbridge.entity.User;
-import com.talentbridge.repository.JobRepository;
-import com.talentbridge.repository.RecruiterProfileRepository;
-import com.talentbridge.repository.UserRepository;
+import com.talentbridge.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -49,13 +47,25 @@ class AuthControllerTest {
     private JobRepository jobRepository;
 
     @Autowired
+    private JobApplicationRepository jobApplicationRepository;
+
+    @Autowired
+    private ApplicationStatusHistoryRepository historyRepository;
+
+    @Autowired
+    private CandidateProfileRepository candidateProfileRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
         // Clean up in reverse foreign key order to respect database referential integrity
+        historyRepository.deleteAll();
+        jobApplicationRepository.deleteAll();
         jobRepository.deleteAll();
         recruiterProfileRepository.deleteAll();
+        candidateProfileRepository.deleteAll();
         userRepository.deleteAll();
 
         // Seed a known test candidate user for login and token tests
