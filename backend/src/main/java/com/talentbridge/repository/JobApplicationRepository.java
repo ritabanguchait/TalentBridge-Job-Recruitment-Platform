@@ -27,15 +27,31 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
 
     @Query("SELECT a FROM JobApplication a " +
             "JOIN FETCH a.job j " +
-            "JOIN FETCH j.recruiterProfile " +
+            "JOIN FETCH j.recruiterProfile rp " +
+            "JOIN FETCH rp.user " +
             "JOIN FETCH a.candidateProfile cp " +
             "JOIN FETCH cp.user " +
             "WHERE a.id = :id")
     Optional<JobApplication> findByIdWithDetails(@Param("id") Long id);
 
-    Page<JobApplication> findByJobId(Long jobId, Pageable pageable);
+    @Query(value = "SELECT a FROM JobApplication a " +
+            "JOIN FETCH a.job j " +
+            "JOIN FETCH j.recruiterProfile " +
+            "JOIN FETCH a.candidateProfile cp " +
+            "JOIN FETCH cp.user " +
+            "WHERE j.id = :jobId AND (:status IS NULL OR a.status = :status)",
+            countQuery = "SELECT COUNT(a) FROM JobApplication a WHERE a.job.id = :jobId AND (:status IS NULL OR a.status = :status)")
+    Page<JobApplication> findByJobIdAndOptionalStatus(@Param("jobId") Long jobId,
+                                                     @Param("status") ApplicationStatus status,
+                                                     Pageable pageable);
 
-    Page<JobApplication> findByJobIdAndStatus(Long jobId, ApplicationStatus status, Pageable pageable);
+    @Query(value = "SELECT a FROM JobApplication a " +
+            "JOIN FETCH a.job j " +
+            "JOIN FETCH a.candidateProfile cp " +
+            "JOIN FETCH cp.user " +
+            "WHERE j.recruiterProfile.id = :recruiterProfileId",
+            countQuery = "SELECT COUNT(a) FROM JobApplication a WHERE a.job.recruiterProfile.id = :recruiterProfileId")
+    Page<JobApplication> findByRecruiterProfileId(@Param("recruiterProfileId") Long recruiterProfileId, Pageable pageable);
 
     long countByCandidateProfileId(Long candidateProfileId);
 
@@ -44,6 +60,13 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
     long countByJobId(Long jobId);
 
     long countByJobIdAndStatus(Long jobId, ApplicationStatus status);
+
+    @Query("SELECT COUNT(a) FROM JobApplication a WHERE a.job.recruiterProfile.id = :recruiterProfileId")
+    long countAllByRecruiterProfileId(@Param("recruiterProfileId") Long recruiterProfileId);
+
+    @Query("SELECT COUNT(a) FROM JobApplication a WHERE a.job.recruiterProfile.id = :recruiterProfileId AND a.status = :status")
+    long countByRecruiterProfileIdAndStatus(@Param("recruiterProfileId") Long recruiterProfileId,
+                                           @Param("status") ApplicationStatus status);
 
     long countByStatus(ApplicationStatus status);
 }
