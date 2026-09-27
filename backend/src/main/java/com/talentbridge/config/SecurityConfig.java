@@ -81,6 +81,9 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
+                // Allow CORS preflight requests across all endpoints
+                .requestMatchers(org.springframework.web.cors.CorsUtils::isPreFlightRequest).permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // Public authentication endpoints
                 .requestMatchers("/api/auth/**").permitAll()
                 // Public read-only job listings and details
@@ -103,11 +106,18 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Allow Vite dev server and general local frontend servers
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000", "http://127.0.0.1:5173"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
-        configuration.setExposedHeaders(List.of("Authorization"));
+        // Allow all local dev origins, ports, and patterns (5173, 5174, 5175, 3000, 4173, 127.0.0.1, etc.)
+        configuration.setAllowedOriginPatterns(List.of(
+            "http://localhost:[*]",
+            "http://127.0.0.1:[*]",
+            "http://[::1]:[*]",
+            "http://localhost",
+            "http://127.0.0.1",
+            "*"
+        ));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 

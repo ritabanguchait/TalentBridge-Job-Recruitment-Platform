@@ -1,10 +1,21 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { 
+  Briefcase, 
+  User, 
+  Building2, 
+  Mail, 
+  Lock, 
+  ArrowRight, 
+  AlertCircle, 
+  Loader2 
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const RegisterPage = () => {
   const [role, setRole] = useState('ROLE_CANDIDATE');
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [companyName, setCompanyName] = useState('');
@@ -23,6 +34,11 @@ const RegisterPage = () => {
       return;
     }
 
+    if (!firstName.trim() || !lastName.trim()) {
+      setErrorMessage('Both First Name and Last Name are required.');
+      return;
+    }
+
     if (role === 'ROLE_RECRUITER' && !companyName.trim()) {
       setErrorMessage('Company Name is required for Recruiter registration.');
       return;
@@ -31,7 +47,8 @@ const RegisterPage = () => {
     setSubmitting(true);
     try {
       const payload = {
-        name: name.trim(),
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
         email: email.trim(),
         password,
         role,
@@ -46,7 +63,7 @@ const RegisterPage = () => {
       }
     } catch (err) {
       console.error('Registration failed', err);
-      const msg = err.response?.data?.message || 'Registration failed. Email may already be in use.';
+      const msg = err.response?.data?.message || 'Registration failed. The email address may already be in use.';
       setErrorMessage(msg);
     } finally {
       setSubmitting(false);
@@ -54,115 +71,173 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="container" style={{ padding: '3.5rem 1rem', maxWidth: '520px' }}>
-      <div className="card card-body" style={{ padding: '2.5rem' }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--navy-900)', marginBottom: '0.5rem' }}>
-            Join TalentBridge
+    <div className="auth-page-container">
+      <div className="auth-card">
+        {/* Brand Header */}
+        <div className="auth-header">
+          <div className="auth-icon-wrap">
+            <Briefcase size={22} strokeWidth={2.4} />
+          </div>
+          <h1 className="auth-title">
+            Create Your Account
           </h1>
-          <p className="text-muted" style={{ fontSize: '0.95rem' }}>
-            Choose your account type to get started
+          <p className="auth-subtitle">
+            Join TalentBridge to apply or recruit top engineering talent
           </p>
         </div>
 
         {errorMessage && (
           <div className="alert alert-error" style={{ marginBottom: '1.5rem' }}>
-            {errorMessage}
+            <AlertCircle size={18} style={{ flexShrink: 0 }} />
+            <span>{errorMessage}</span>
           </div>
         )}
 
-        {/* Account Role Selector */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
+        {/* Role Toggle Selector */}
+        <div className="auth-role-selector">
           <button
             type="button"
-            className={`btn ${role === 'ROLE_CANDIDATE' ? 'btn-primary' : 'btn-outline'}`}
+            className={`auth-role-btn ${role === 'ROLE_CANDIDATE' ? 'active' : ''}`}
             onClick={() => setRole('ROLE_CANDIDATE')}
-            style={{ padding: '0.85rem 0.5rem', textAlign: 'center' }}
           >
-            <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Job Seeker</div>
-            <div style={{ fontSize: '0.75rem', opacity: 0.85, marginTop: '0.2rem' }}>Looking for roles</div>
+            <User size={18} />
+            <div className="auth-role-btn-title">Job Seeker</div>
+            <div className="auth-role-btn-sub">Seeking roles</div>
           </button>
 
           <button
             type="button"
-            className={`btn ${role === 'ROLE_RECRUITER' ? 'btn-primary' : 'btn-outline'}`}
+            className={`auth-role-btn ${role === 'ROLE_RECRUITER' ? 'active' : ''}`}
             onClick={() => setRole('ROLE_RECRUITER')}
-            style={{ padding: '0.85rem 0.5rem', textAlign: 'center' }}
           >
-            <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Employer / Recruiter</div>
-            <div style={{ fontSize: '0.75rem', opacity: 0.85, marginTop: '0.2rem' }}>Hiring developers</div>
+            <Building2 size={18} />
+            <div className="auth-role-btn-title">Employer</div>
+            <div className="auth-role-btn-sub">Hiring talent</div>
           </button>
         </div>
 
         <form onSubmit={handleRegister}>
-          <div className="form-group">
-            <label className="form-label" htmlFor="reg-name">Full Name</label>
-            <input
-              id="reg-name"
-              type="text"
-              className="form-input"
-              placeholder={role === 'ROLE_RECRUITER' ? 'e.g. Sarah Jenkins' : 'e.g. John Doe'}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
+          <div className="auth-form-row">
+            <div className="form-group">
+              <label className="form-label" htmlFor="reg-first-name">
+                First Name *
+              </label>
+              <input
+                id="reg-first-name"
+                type="text"
+                className="form-input"
+                placeholder="e.g. John"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+                disabled={submitting}
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="reg-last-name">
+                Last Name *
+              </label>
+              <input
+                id="reg-last-name"
+                type="text"
+                className="form-input"
+                placeholder="e.g. Doe"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+                disabled={submitting}
+              />
+            </div>
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="reg-email">Work / Personal Email</label>
-            <input
-              id="reg-email"
-              type="email"
-              className="form-input"
-              placeholder="you@domain.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+            <label className="form-label" htmlFor="reg-email">
+              Work / Personal Email *
+            </label>
+            <div style={{ position: 'relative' }}>
+              <input
+                id="reg-email"
+                type="email"
+                className="form-input"
+                style={{ paddingLeft: '2.25rem' }}
+                placeholder="you@domain.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={submitting}
+              />
+              <Mail size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)' }} />
+            </div>
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="reg-password">Password</label>
-            <input
-              id="reg-password"
-              type="password"
-              className="form-input"
-              placeholder="Minimum 6 characters"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-            />
+            <label className="form-label" htmlFor="reg-password">
+              Password *
+            </label>
+            <div style={{ position: 'relative' }}>
+              <input
+                id="reg-password"
+                type="password"
+                className="form-input"
+                style={{ paddingLeft: '2.25rem' }}
+                placeholder="Minimum 6 characters"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                disabled={submitting}
+              />
+              <Lock size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)' }} />
+            </div>
           </div>
 
           {role === 'ROLE_RECRUITER' && (
             <div className="form-group">
-              <label className="form-label" htmlFor="reg-company">Company / Organization Name</label>
-              <input
-                id="reg-company"
-                type="text"
-                className="form-input"
-                placeholder="e.g. Acme Tech Innovations"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                required
-              />
+              <label className="form-label" htmlFor="reg-company">
+                Company / Organization *
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  id="reg-company"
+                  type="text"
+                  className="form-input"
+                  style={{ paddingLeft: '2.25rem' }}
+                  placeholder="e.g. Acme Tech Innovations"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  required
+                  disabled={submitting}
+                />
+                <Building2 size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)' }} />
+              </div>
             </div>
           )}
 
           <button
             type="submit"
             className="btn btn-primary"
-            style={{ width: '100%', padding: '0.75rem', marginTop: '0.75rem' }}
+            style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}
             disabled={submitting}
           >
-            {submitting ? 'Creating Account...' : `Register as ${role === 'ROLE_RECRUITER' ? 'Recruiter' : 'Candidate'}`}
+            {submitting ? (
+              <>
+                <Loader2 size={16} style={{ animation: 'spin 0.7s linear infinite' }} />
+                <span>Creating Account...</span>
+              </>
+            ) : (
+              <>
+                <span>Register as {role === 'ROLE_RECRUITER' ? 'Recruiter' : 'Candidate'}</span>
+                <ArrowRight size={15} />
+              </>
+            )}
           </button>
         </form>
 
-        <div style={{ marginTop: '1.75rem', textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-          Already have an account?{' '}
-          <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 600 }}>
+        {/* Footer Link */}
+        <div className="auth-footer">
+          <span>Already have an account?</span>
+          <Link to="/login" className="auth-footer-link">
             Sign In
           </Link>
         </div>

@@ -48,7 +48,7 @@ public class CandidateServiceImpl implements CandidateService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public CandidateProfileDto getProfile(Long userId) {
         CandidateProfile profile = getOrCreateCandidateProfile(userId);
         return new CandidateProfileDto(
@@ -185,7 +185,7 @@ public class CandidateServiceImpl implements CandidateService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public CandidateDashboardStats getDashboardStats(Long userId) {
         CandidateProfile profile = getOrCreateCandidateProfile(userId);
         Long profileId = profile.getId();

@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { 
+  Briefcase, 
+  Clock, 
+  CalendarCheck, 
+  Award, 
+  ArrowRight, 
+  User, 
+  Search, 
+  Building2, 
+  FileText,
+  AlertCircle
+} from 'lucide-react';
 import applicationService from '../../services/applicationService';
 import { useAuth } from '../../context/AuthContext';
 import StatusBadge from '../../components/common/StatusBadge';
@@ -33,88 +45,125 @@ const CandidateDashboard = () => {
     fetchDashboardData();
   }, []);
 
+  const displayName = user?.firstName
+    ? `${user.firstName} ${user.lastName || ''}`.trim()
+    : user?.name || 'Engineer';
+
   if (loading) {
     return (
-      <div className="container" style={{ padding: '3.5rem 1rem' }}>
-        <LoadingSpinner text="Loading candidate overview..." />
+      <div className="container" style={{ padding: '3.5rem 1.5rem' }}>
+        <LoadingSpinner text="Compiling candidate dashboard metrics..." />
       </div>
     );
   }
 
   return (
-    <div className="container" style={{ padding: '2.5rem 1rem' }}>
-      {/* Welcome Banner */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
-        <div>
-          <span className="badge badge-primary" style={{ marginBottom: '0.5rem' }}>Job Seeker Hub</span>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--navy-900)' }}>
-            Welcome back, {user?.name}!
+    <div className="container" style={{ padding: '2.5rem 1.5rem' }}>
+      {/* Header Banner */}
+      <div className="page-header">
+        <div className="page-header-content">
+          <span className="badge badge-candidate" style={{ marginBottom: '0.45rem' }}>
+            Job Seeker Hub
+          </span>
+          <h1 className="page-title">
+            Welcome back, {displayName}
           </h1>
-          <p className="text-muted">Here is a quick snapshot of your active job applications and hiring progress.</p>
+          <p className="page-subtitle">
+            Here is your live application activity, status transitions, and active hiring stages.
+          </p>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+
+        <div className="page-actions">
           <Link to="/jobs" className="btn btn-primary">
-            Explore Openings &rarr;
+            <Search size={15} />
+            <span>Search Jobs</span>
           </Link>
           <Link to="/candidate/profile" className="btn btn-outline">
-            Update Profile
+            <User size={15} />
+            <span>Edit Profile</span>
           </Link>
         </div>
       </div>
 
       {error && (
-        <div className="alert alert-error" style={{ marginBottom: '1.5rem' }}>
-          {error}
+        <div className="alert alert-error" style={{ marginBottom: '1.75rem' }}>
+          <AlertCircle size={18} style={{ flexShrink: 0 }} />
+          <span>{error}</span>
         </div>
       )}
 
-      {/* Metrics Row */}
+      {/* KPI Stat Cards Grid */}
       <div className="grid-4" style={{ marginBottom: '2.5rem' }}>
-        <div className="card card-body" style={{ borderLeft: '4px solid var(--primary)' }}>
-          <div className="text-muted" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Total Applied</div>
-          <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--navy-900)', marginTop: '0.25rem' }}>
-            {stats?.totalApplications || 0}
+        <div className="stat-card stat-primary">
+          <div className="stat-content">
+            <span className="stat-label">Total Applied</span>
+            <div className="stat-val">{stats?.totalApplications || 0}</div>
+            <span className="stat-desc">Submitted applications</span>
+          </div>
+          <div className="stat-icon">
+            <Briefcase size={20} />
           </div>
         </div>
 
-        <div className="card card-body" style={{ borderLeft: '4px solid var(--warning)' }}>
-          <div className="text-muted" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Under Review</div>
-          <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--warning)', marginTop: '0.25rem' }}>
-            {stats?.underReviewCount || 0}
+        <div className="stat-card stat-warning">
+          <div className="stat-content">
+            <span className="stat-label">Under Review</span>
+            <div className="stat-val">{stats?.underReviewCount || 0}</div>
+            <span className="stat-desc">Pending initial screening</span>
+          </div>
+          <div className="stat-icon">
+            <Clock size={20} />
           </div>
         </div>
 
-        <div className="card card-body" style={{ borderLeft: '4px solid #8b5cf6' }}>
-          <div className="text-muted" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Shortlisted & Interviews</div>
-          <div style={{ fontSize: '2rem', fontWeight: 800, color: '#8b5cf6', marginTop: '0.25rem' }}>
-            {(stats?.shortlistedCount || 0) + (stats?.interviewCount || 0)}
+        <div className="stat-card stat-purple">
+          <div className="stat-content">
+            <span className="stat-label">Interviews</span>
+            <div className="stat-val">{(stats?.shortlistedCount || 0) + (stats?.interviewCount || 0)}</div>
+            <span className="stat-desc">{stats?.interviewCount || 0} currently scheduled</span>
+          </div>
+          <div className="stat-icon">
+            <CalendarCheck size={20} />
           </div>
         </div>
 
-        <div className="card card-body" style={{ borderLeft: '4px solid var(--success)' }}>
-          <div className="text-muted" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Offers / Selected</div>
-          <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--success)', marginTop: '0.25rem' }}>
-            {stats?.selectedCount || 0}
+        <div className="stat-card stat-success">
+          <div className="stat-content">
+            <span className="stat-label">Selected</span>
+            <div className="stat-val">{stats?.selectedCount || 0}</div>
+            <span className="stat-desc">Offers / selections</span>
+          </div>
+          <div className="stat-icon">
+            <Award size={20} />
           </div>
         </div>
       </div>
 
       {/* Recent Applications Section */}
-      <div className="card" style={{ padding: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-          <h2 style={{ fontSize: '1.35rem', margin: 0 }}>Recent Applications</h2>
+      <div className="card" style={{ padding: '1.75rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-default)' }}>
+          <div>
+            <h2 style={{ fontSize: '1.25rem', color: 'var(--slate-900)', margin: 0 }}>Recent Applications</h2>
+            <p className="text-muted" style={{ fontSize: '0.85rem', margin: 0 }}>Your 5 latest job submissions and their status</p>
+          </div>
           <Link to="/candidate/applications" className="btn btn-outline btn-sm">
-            View All ({stats?.totalApplications || 0}) &rarr;
+            <span>View All ({stats?.totalApplications || 0})</span>
+            <ArrowRight size={14} />
           </Link>
         </div>
 
         {recentApplications.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
-            <p className="text-muted" style={{ marginBottom: '1rem' }}>
-              You haven't applied for any positions yet.
+          <div style={{ textAlign: 'center', padding: '3rem 1.5rem' }}>
+            <div style={{ width: 48, height: 48, borderRadius: 'var(--radius-full)', backgroundColor: 'var(--slate-100)', color: 'var(--slate-500)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem auto' }}>
+              <FileText size={22} />
+            </div>
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.35rem' }}>No applications submitted yet</h3>
+            <p className="text-muted" style={{ maxWidth: '400px', margin: '0 auto 1.5rem auto', fontSize: '0.875rem' }}>
+              Explore vetted roles from top engineering teams and start submitting your applications.
             </p>
             <Link to="/jobs" className="btn btn-primary btn-sm">
-              Discover Jobs Now
+              <Search size={14} />
+              <span>Browse Job Listings</span>
             </Link>
           </div>
         ) : (
@@ -126,25 +175,31 @@ const CandidateDashboard = () => {
                   <th>Company</th>
                   <th>Applied On</th>
                   <th>Current Status</th>
-                  <th>Action</th>
+                  <th style={{ textAlign: 'right' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {recentApplications.map((app) => (
                   <tr key={app.id}>
                     <td style={{ fontWeight: 600 }}>
-                      <Link to={`/jobs/${app.jobId}`} style={{ color: 'inherit' }}>
+                      <Link to={`/jobs/${app.jobId}`} style={{ color: 'var(--slate-900)' }}>
                         {app.jobTitle}
                       </Link>
                     </td>
-                    <td>{app.companyName}</td>
-                    <td>{new Date(app.appliedAt).toLocaleDateString()}</td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <Building2 size={13} className="text-muted" />
+                        <span>{app.companyName}</span>
+                      </div>
+                    </td>
+                    <td>{new Date(app.appliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                     <td>
                       <StatusBadge status={app.status} type="application" />
                     </td>
-                    <td>
+                    <td style={{ textAlign: 'right' }}>
                       <Link to={`/candidate/applications/${app.id}`} className="btn btn-outline btn-sm">
-                        View Details
+                        <span>Timeline</span>
+                        <ArrowRight size={13} />
                       </Link>
                     </td>
                   </tr>

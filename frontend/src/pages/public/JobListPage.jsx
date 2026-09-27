@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { 
+  Search, 
+  MapPin, 
+  Briefcase, 
+  GraduationCap, 
+  RotateCcw, 
+  Filter, 
+  ChevronLeft, 
+  ChevronRight,
+  SlidersHorizontal,
+  X
+} from 'lucide-react';
 import jobService from '../../services/jobService';
 import JobCard from '../../components/jobs/JobCard';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -8,7 +20,7 @@ import EmptyState from '../../components/common/EmptyState';
 const JobListPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Filters state from query parameters or defaults
+  // Filters state
   const [keyword, setKeyword] = useState(searchParams.get('keyword') || '');
   const [location, setLocation] = useState(searchParams.get('location') || '');
   const [jobType, setJobType] = useState(searchParams.get('jobType') || '');
@@ -69,7 +81,6 @@ const JobListPage = () => {
     setJobType('');
     setExperienceLevel('');
     setSearchParams({});
-    // Fetch all jobs directly
     jobService.searchJobs({ page: 0, size: 8 }).then((data) => {
       setJobs(data.content || []);
       setPage(data.number || 0);
@@ -78,64 +89,95 @@ const JobListPage = () => {
     });
   };
 
+  const hasActiveFilters = Boolean(keyword || location || jobType || experienceLevel);
+
   return (
-    <div className="container" style={{ padding: '2.5rem 1rem' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2.25rem', fontWeight: 800 }}>Explore Job Openings</h1>
-        <p className="text-muted">
-          Find your dream tech opportunity from verified companies across India and remote.
-        </p>
+    <div className="container" style={{ padding: '2.5rem 1.5rem' }}>
+      {/* Page Title Header */}
+      <div className="page-header">
+        <div className="page-header-content">
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--primary-600)', marginBottom: '0.35rem' }}>
+            <span>Directory</span>
+            <span>&bull;</span>
+            <span>Live Openings</span>
+          </div>
+          <h1 className="page-title">Explore Engineering Opportunities</h1>
+          <p className="page-subtitle">
+            Find vetted tech roles with transparent salaries and direct employer recruitment workflows.
+          </p>
+        </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '2rem', alignItems: 'start' }}>
-        {/* Filter Sidebar */}
-        <div className="card card-body" style={{ position: 'sticky', top: '90px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-            <h3 style={{ fontSize: '1.15rem', margin: 0 }}>Filter Jobs</h3>
-            <button
-              type="button"
-              onClick={handleResetFilters}
-              className="btn btn-outline btn-sm"
-              style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem' }}
-            >
-              Reset
-            </button>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, 310px) 1fr', gap: '2rem', alignItems: 'start' }}>
+        {/* Sticky Filter Sidebar */}
+        <aside className="card card-body" style={{ position: 'sticky', top: '88px', padding: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-default)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '1rem', color: 'var(--slate-900)' }}>
+              <SlidersHorizontal size={16} className="text-primary" />
+              <span>Filter Criteria</span>
+            </div>
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="btn btn-ghost btn-sm"
+                style={{ padding: '0.2rem 0.5rem', fontSize: '0.775rem' }}
+                title="Reset all filters"
+              >
+                <RotateCcw size={12} />
+                <span>Reset</span>
+              </button>
+            )}
           </div>
 
           <form onSubmit={handleFilterSubmit}>
             <div className="form-group">
-              <label className="form-label" htmlFor="filter-keyword">Keyword / Title</label>
-              <input
-                id="filter-keyword"
-                type="text"
-                className="form-input"
-                placeholder="e.g. Java, React, Spring"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-              />
+              <label className="form-label" htmlFor="filter-keyword">
+                Keyword / Role Title
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  id="filter-keyword"
+                  type="text"
+                  className="form-input"
+                  style={{ paddingLeft: '2.2rem' }}
+                  placeholder="e.g. Java, React, DevOps"
+                  value={keyword}
+                  onChange={(e) => setKeyword(e.target.value)}
+                />
+                <Search size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)' }} />
+              </div>
             </div>
 
             <div className="form-group">
-              <label className="form-label" htmlFor="filter-location">Location</label>
-              <input
-                id="filter-location"
-                type="text"
-                className="form-input"
-                placeholder="e.g. Bangalore, Remote"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-              />
+              <label className="form-label" htmlFor="filter-location">
+                Location
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  id="filter-location"
+                  type="text"
+                  className="form-input"
+                  style={{ paddingLeft: '2.2rem' }}
+                  placeholder="e.g. Bangalore, Remote"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                />
+                <MapPin size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)' }} />
+              </div>
             </div>
 
             <div className="form-group">
-              <label className="form-label" htmlFor="filter-jobtype">Employment Type</label>
+              <label className="form-label" htmlFor="filter-jobtype">
+                Employment Type
+              </label>
               <select
                 id="filter-jobtype"
                 className="form-select"
                 value={jobType}
                 onChange={(e) => setJobType(e.target.value)}
               >
-                <option value="">All Types</option>
+                <option value="">All Employment Types</option>
                 <option value="FULL_TIME">Full Time</option>
                 <option value="PART_TIME">Part Time</option>
                 <option value="CONTRACT">Contract</option>
@@ -144,14 +186,16 @@ const JobListPage = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label" htmlFor="filter-exp">Experience Level</label>
+              <label className="form-label" htmlFor="filter-exp">
+                Experience Level
+              </label>
               <select
                 id="filter-exp"
                 className="form-select"
                 value={experienceLevel}
                 onChange={(e) => setExperienceLevel(e.target.value)}
               >
-                <option value="">All Levels</option>
+                <option value="">All Experience Levels</option>
                 <option value="ENTRY_LEVEL">Entry Level (0-2 yrs)</option>
                 <option value="MID_LEVEL">Mid Level (3-5 yrs)</option>
                 <option value="SENIOR_LEVEL">Senior Level (5+ yrs)</option>
@@ -159,22 +203,49 @@ const JobListPage = () => {
             </div>
 
             <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '0.5rem' }}>
-              Apply Filters
+              <Filter size={15} />
+              <span>Apply Filters</span>
             </button>
           </form>
-        </div>
+        </aside>
 
         {/* Results Stream */}
-        <div>
-          {/* Status summary */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-            <span className="text-muted" style={{ fontSize: '0.95rem' }}>
-              Showing <strong>{jobs.length}</strong> of <strong>{totalElements}</strong> open positions
-            </span>
+        <section>
+          {/* Status summary & Active Chips */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+            <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+              Showing <strong style={{ color: 'var(--slate-900)' }}>{jobs.length}</strong> of{' '}
+              <strong style={{ color: 'var(--slate-900)' }}>{totalElements}</strong> positions
+            </div>
+
+            {hasActiveFilters && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                {keyword && (
+                  <span className="badge badge-applied" style={{ fontSize: '0.75rem' }}>
+                    Keyword: {keyword}
+                  </span>
+                )}
+                {location && (
+                  <span className="badge badge-applied" style={{ fontSize: '0.75rem' }}>
+                    Location: {location}
+                  </span>
+                )}
+                {jobType && (
+                  <span className="badge badge-applied" style={{ fontSize: '0.75rem' }}>
+                    {jobType.replace(/_/g, ' ')}
+                  </span>
+                )}
+                {experienceLevel && (
+                  <span className="badge badge-applied" style={{ fontSize: '0.75rem' }}>
+                    {experienceLevel.replace(/_/g, ' ')}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           {error && (
-            <div className="alert alert-error" style={{ marginBottom: '1.5rem' }}>
+            <div className="alert alert-error">
               {error}
             </div>
           )}
@@ -189,7 +260,7 @@ const JobListPage = () => {
                 ))}
               </div>
 
-              {/* Pagination */}
+              {/* Pagination Controls */}
               {totalPages > 1 && (
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem', marginTop: '2.5rem' }}>
                   <button
@@ -197,17 +268,19 @@ const JobListPage = () => {
                     disabled={page === 0}
                     onClick={() => fetchJobs(page - 1)}
                   >
-                    &larr; Previous
+                    <ChevronLeft size={16} />
+                    <span>Previous</span>
                   </button>
-                  <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                    Page {page + 1} of {totalPages}
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                    Page <strong>{page + 1}</strong> of <strong>{totalPages}</strong>
                   </span>
                   <button
                     className="btn btn-outline btn-sm"
                     disabled={page + 1 >= totalPages}
                     onClick={() => fetchJobs(page + 1)}
                   >
-                    Next &rarr;
+                    <span>Next</span>
+                    <ChevronRight size={16} />
                   </button>
                 </div>
               )}
@@ -215,12 +288,12 @@ const JobListPage = () => {
           ) : (
             <EmptyState
               title="No matching jobs found"
-              message="Try broadening your search query or removing some filters to see more results."
+              message="Try broadening your search query or removing active filters to see more results."
               actionLabel="Reset All Filters"
               onAction={handleResetFilters}
             />
           )}
-        </div>
+        </section>
       </div>
     </div>
   );

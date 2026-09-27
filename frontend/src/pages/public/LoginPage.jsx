@@ -1,28 +1,71 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { 
+  Briefcase, 
+  Mail, 
+  Lock, 
+  ArrowRight, 
+  AlertCircle, 
+  ShieldCheck, 
+  Building2, 
+  UserCheck,
+  Sparkles,
+  Loader2
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+
+const DEMO_ACCOUNTS = [
+  {
+    role: 'ROLE_CANDIDATE',
+    label: 'Candidate',
+    email: 'candidate@talentbridge.com',
+    password: 'Candidate@123',
+    icon: UserCheck,
+    colorClass: 'text-success',
+    redirectPath: '/candidate/dashboard',
+  },
+  {
+    role: 'ROLE_RECRUITER',
+    label: 'Recruiter',
+    email: 'recruiter@talentbridge.com',
+    password: 'Recruiter@123',
+    icon: Building2,
+    colorClass: 'text-primary',
+    redirectPath: '/recruiter/dashboard',
+  },
+  {
+    role: 'ROLE_ADMIN',
+    label: 'Admin',
+    email: 'admin@talentbridge.com',
+    password: 'Admin@123',
+    icon: ShieldCheck,
+    colorClass: 'text-danger',
+    redirectPath: '/admin/dashboard',
+  },
+];
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [loadingDemoRole, setLoadingDemoRole] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
 
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+  const performLogin = async (targetEmail, targetPassword, fallbackPath) => {
     setErrorMessage(null);
     setSubmitting(true);
 
     try {
-      const user = await login(email, password);
-      // Determine redirection target
+      const user = await login(targetEmail, targetPassword);
       const from = location.state?.from?.pathname;
       if (from) {
         navigate(from, { replace: true });
+      } else if (fallbackPath) {
+        navigate(fallbackPath, { replace: true });
       } else if (user.role === 'ROLE_ADMIN') {
         navigate('/admin/dashboard', { replace: true });
       } else if (user.role === 'ROLE_RECRUITER') {
@@ -31,63 +74,92 @@ const LoginPage = () => {
         navigate('/candidate/dashboard', { replace: true });
       }
     } catch (err) {
-      console.error('Login failed', err);
+      console.error('Authentication failed', err);
       const msg = err.response?.data?.message || 'Invalid email or password. Please verify your credentials.';
       setErrorMessage(msg);
     } finally {
       setSubmitting(false);
+      setLoadingDemoRole(null);
     }
   };
 
-  const fillCredentials = (demoEmail, demoPass) => {
-    setEmail(demoEmail);
-    setPassword(demoPass);
-    setErrorMessage(null);
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    await performLogin(email.trim(), password);
+  };
+
+  const handleDemoAccountClick = async (demo) => {
+    // 1. Automatically populate credentials
+    setEmail(demo.email);
+    setPassword(demo.password);
+    setLoadingDemoRole(demo.role);
+
+    // 2. Submit login request & authenticate
+    await performLogin(demo.email, demo.password, demo.redirectPath);
   };
 
   return (
-    <div className="container" style={{ padding: '3.5rem 1rem', maxWidth: '480px' }}>
-      <div className="card card-body" style={{ padding: '2.5rem' }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--navy-900)', marginBottom: '0.5rem' }}>
+    <div className="auth-page-container">
+      <div className="auth-card">
+        {/* Brand Header */}
+        <div className="auth-header">
+          <div className="auth-icon-wrap">
+            <Briefcase size={22} strokeWidth={2.4} />
+          </div>
+          <h1 className="auth-title">
             Welcome Back
           </h1>
-          <p className="text-muted" style={{ fontSize: '0.95rem' }}>
-            Log in to manage your applications or candidate postings
+          <p className="auth-subtitle">
+            Sign in to manage your applications and candidate pipelines
           </p>
         </div>
 
         {errorMessage && (
           <div className="alert alert-error" style={{ marginBottom: '1.5rem' }}>
-            {errorMessage}
+            <AlertCircle size={18} style={{ flexShrink: 0 }} />
+            <span>{errorMessage}</span>
           </div>
         )}
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleFormSubmit}>
           <div className="form-group">
-            <label className="form-label" htmlFor="login-email">Email Address</label>
-            <input
-              id="login-email"
-              type="email"
-              className="form-input"
-              placeholder="you@company.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+            <label className="form-label" htmlFor="login-email">
+              Email Address
+            </label>
+            <div style={{ position: 'relative' }}>
+              <input
+                id="login-email"
+                type="email"
+                className="form-input"
+                style={{ paddingLeft: '2.25rem' }}
+                placeholder="you@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={submitting}
+              />
+              <Mail size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)' }} />
+            </div>
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="login-password">Password</label>
-            <input
-              id="login-password"
-              type="password"
-              className="form-input"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <label className="form-label" htmlFor="login-password">
+              Password
+            </label>
+            <div style={{ position: 'relative' }}>
+              <input
+                id="login-password"
+                type="password"
+                className="form-input"
+                style={{ paddingLeft: '2.25rem' }}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={submitting}
+              />
+              <Lock size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)' }} />
+            </div>
           </div>
 
           <button
@@ -96,46 +168,57 @@ const LoginPage = () => {
             style={{ width: '100%', padding: '0.75rem', marginTop: '0.5rem' }}
             disabled={submitting}
           >
-            {submitting ? 'Authenticating...' : 'Sign In'}
+            {submitting && !loadingDemoRole ? (
+              <>
+                <Loader2 size={16} className="spinner" style={{ border: 'none', animation: 'spin 0.7s linear infinite' }} />
+                <span>Authenticating...</span>
+              </>
+            ) : (
+              <>
+                <span>Sign In to Account</span>
+                <ArrowRight size={15} />
+              </>
+            )}
           </button>
         </form>
 
-        {/* Quick Demo Logins for Interview / Review */}
-        <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
-          <div style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: '0.75rem', textAlign: 'center' }}>
-            Interview Demo Accounts
+        {/* Interview Demo Accounts */}
+        <div className="demo-accounts-section">
+          <div className="demo-accounts-label">
+            <Sparkles size={13} className="text-primary" />
+            <span>Interview Demo Accounts</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
-            <button
-              type="button"
-              className="btn btn-outline btn-sm"
-              style={{ fontSize: '0.75rem', padding: '0.4rem 0.2rem' }}
-              onClick={() => fillCredentials('admin@talentbridge.com', 'Admin@123')}
-            >
-              Demo Admin
-            </button>
-            <button
-              type="button"
-              className="btn btn-outline btn-sm"
-              style={{ fontSize: '0.75rem', padding: '0.4rem 0.2rem' }}
-              onClick={() => fillCredentials('recruiter@techcorp.com', 'Recruiter@123')}
-            >
-              Demo Recruiter
-            </button>
-            <button
-              type="button"
-              className="btn btn-outline btn-sm"
-              style={{ fontSize: '0.75rem', padding: '0.4rem 0.2rem' }}
-              onClick={() => fillCredentials('candidate@gmail.com', 'Candidate@123')}
-            >
-              Demo Candidate
-            </button>
+
+          <div className="demo-accounts-grid">
+            {DEMO_ACCOUNTS.map((demo) => {
+              const IconComponent = demo.icon;
+              const isCurrentlyLoading = loadingDemoRole === demo.role;
+
+              return (
+                <button
+                  key={demo.role}
+                  type="button"
+                  className="demo-account-btn"
+                  onClick={() => handleDemoAccountClick(demo)}
+                  disabled={submitting}
+                  title={`Sign in instantly as ${demo.label} (${demo.email})`}
+                >
+                  {isCurrentlyLoading ? (
+                    <Loader2 size={14} style={{ animation: 'spin 0.7s linear infinite' }} />
+                  ) : (
+                    <IconComponent size={14} className={demo.colorClass} />
+                  )}
+                  <span>{isCurrentlyLoading ? 'Logging in...' : demo.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        <div style={{ marginTop: '1.75rem', textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-          Don't have an account yet?{' '}
-          <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 600 }}>
+        {/* Footer Link */}
+        <div className="auth-footer">
+          <span>Don't have an account yet?</span>
+          <Link to="/register" className="auth-footer-link">
             Create Account
           </Link>
         </div>

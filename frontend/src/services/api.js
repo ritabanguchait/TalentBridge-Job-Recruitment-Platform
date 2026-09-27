@@ -11,11 +11,12 @@ const api = axios.create({
   },
 });
 
-// Request interceptor: Attach JWT Bearer token if available
+// Request interceptor: Attach JWT Bearer token if available (except for auth endpoints)
 api.interceptors.request.use(
   (config) => {
+    const isAuthEndpoint = config.url && (config.url.includes('/auth/login') || config.url.includes('/auth/register'));
     const token = localStorage.getItem('talentbridge_token');
-    if (token) {
+    if (token && !isAuthEndpoint) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;

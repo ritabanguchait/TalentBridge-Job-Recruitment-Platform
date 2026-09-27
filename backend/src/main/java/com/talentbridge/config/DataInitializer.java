@@ -1,6 +1,7 @@
 package com.talentbridge.config;
 
 import com.talentbridge.entity.*;
+import com.talentbridge.repository.CandidateProfileRepository;
 import com.talentbridge.repository.JobRepository;
 import com.talentbridge.repository.RecruiterProfileRepository;
 import com.talentbridge.repository.UserRepository;
@@ -22,15 +23,18 @@ public class DataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final RecruiterProfileRepository recruiterProfileRepository;
+    private final CandidateProfileRepository candidateProfileRepository;
     private final JobRepository jobRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DataInitializer(UserRepository userRepository,
                            RecruiterProfileRepository recruiterProfileRepository,
+                           CandidateProfileRepository candidateProfileRepository,
                            JobRepository jobRepository,
                            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.recruiterProfileRepository = recruiterProfileRepository;
+        this.candidateProfileRepository = candidateProfileRepository;
         this.jobRepository = jobRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -39,10 +43,13 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         seedUserIfNotFound("admin@talentbridge.com", "Admin@123", "Admin", "User", Role.ROLE_ADMIN);
         User recruiter = seedUserIfNotFound("recruiter@talentbridge.com", "Recruiter@123", "Sarah", "Jenkins", Role.ROLE_RECRUITER);
-        seedUserIfNotFound("candidate@talentbridge.com", "Candidate@123", "Alex", "Morgan", Role.ROLE_CANDIDATE);
+        User candidate = seedUserIfNotFound("candidate@talentbridge.com", "Candidate@123", "Alex", "Morgan", Role.ROLE_CANDIDATE);
 
         if (recruiter != null) {
             seedRecruiterData(recruiter);
+        }
+        if (candidate != null) {
+            seedCandidateData(candidate);
         }
     }
 
@@ -119,5 +126,23 @@ public class DataInitializer implements CommandLineRunner {
             jobRepository.save(job3);
             logger.info("Seeded 3 initial sample job postings for TechFlow Solutions");
         }
+    }
+
+    private void seedCandidateData(User candidate) {
+        candidateProfileRepository.findByUserId(candidate.getId()).orElseGet(() -> {
+            CandidateProfile profile = CandidateProfile.builder()
+                    .user(candidate)
+                    .headline("Full-Stack Software Engineer")
+                    .phone("+91 9876543210")
+                    .location("Bangalore, India")
+                    .skills("Java 17, Spring Boot, MySQL, React, REST APIs, Git, Docker")
+                    .experienceYears(2)
+                    .education("B.Tech in Computer Science, 2024")
+                    .portfolioUrl("https://github.com/alex-morgan")
+                    .build();
+            CandidateProfile saved = candidateProfileRepository.save(profile);
+            logger.info("Seeded candidate profile for {}", candidate.getEmail());
+            return saved;
+        });
     }
 }

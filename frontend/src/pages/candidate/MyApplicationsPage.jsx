@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { 
+  Building2, 
+  MapPin, 
+  Calendar, 
+  ArrowRight, 
+  AlertCircle, 
+  Search, 
+  ChevronLeft, 
+  ChevronRight,
+  FileText
+} from 'lucide-react';
 import applicationService from '../../services/applicationService';
 import StatusBadge from '../../components/common/StatusBadge';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -45,7 +56,6 @@ const MyApplicationsPage = () => {
     try {
       await applicationService.withdrawApplication(withdrawAppId);
       setWithdrawAppId(null);
-      // Refresh list
       fetchApplications(page);
     } catch (err) {
       console.error('Failed to withdraw application', err);
@@ -57,43 +67,57 @@ const MyApplicationsPage = () => {
 
   if (loading && applications.length === 0) {
     return (
-      <div className="container" style={{ padding: '3.5rem 1rem' }}>
+      <div className="container" style={{ padding: '3.5rem 1.5rem' }}>
         <LoadingSpinner text="Loading submitted applications..." />
       </div>
     );
   }
 
   return (
-    <div className="container" style={{ padding: '2.5rem 1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--navy-900)' }}>
-            My Applications
-          </h1>
-          <p className="text-muted">
-            Track real-time candidate progression and recruiter status updates.
+    <div className="container" style={{ padding: '2.5rem 1.5rem' }}>
+      <div className="page-header">
+        <div className="page-header-content">
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--primary-600)', marginBottom: '0.35rem' }}>
+            <span>Submissions</span>
+            <span>&bull;</span>
+            <span>Live Progression</span>
+          </div>
+          <h1 className="page-title">My Applications</h1>
+          <p className="page-subtitle">
+            Track real-time hiring stage transitions and reviewer notes across your active submissions.
           </p>
         </div>
-        <Link to="/jobs" className="btn btn-primary">
-          Browse More Jobs
-        </Link>
+
+        <div className="page-actions">
+          <Link to="/jobs" className="btn btn-primary">
+            <Search size={15} />
+            <span>Browse More Jobs</span>
+          </Link>
+        </div>
       </div>
 
       {error && (
-        <div className="alert alert-error" style={{ marginBottom: '1.5rem' }}>
-          {error}
+        <div className="alert alert-error" style={{ marginBottom: '1.75rem' }}>
+          <AlertCircle size={18} style={{ flexShrink: 0 }} />
+          <span>{error}</span>
         </div>
       )}
 
       {applications.length === 0 ? (
         <EmptyState
           title="No Applications Submitted"
-          message="You haven't submitted any job applications yet. Discover matching tech roles and submit your application."
+          message="You haven't submitted any job applications yet. Discover engineering opportunities and apply with your candidate profile."
           actionLabel="Search Open Positions"
           onAction={() => window.location.href = '/jobs'}
         />
       ) : (
-        <div className="card" style={{ padding: '1.5rem' }}>
+        <div className="card" style={{ padding: '1.75rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <span className="text-muted" style={{ fontSize: '0.875rem' }}>
+              Showing <strong>{applications.length}</strong> of <strong>{totalElements}</strong> submissions
+            </span>
+          </div>
+
           <div className="table-responsive">
             <table className="table">
               <thead>
@@ -101,7 +125,7 @@ const MyApplicationsPage = () => {
                   <th>Job Title</th>
                   <th>Company</th>
                   <th>Location</th>
-                  <th>Submitted Date</th>
+                  <th>Applied Date</th>
                   <th>Current Status</th>
                   <th style={{ textAlign: 'right' }}>Actions</th>
                 </tr>
@@ -113,13 +137,23 @@ const MyApplicationsPage = () => {
                   return (
                     <tr key={app.id}>
                       <td style={{ fontWeight: 600 }}>
-                        <Link to={`/jobs/${app.jobId}`} style={{ color: 'var(--navy-900)' }}>
+                        <Link to={`/jobs/${app.jobId}`} style={{ color: 'var(--slate-900)' }}>
                           {app.jobTitle}
                         </Link>
                       </td>
-                      <td>{app.companyName}</td>
-                      <td>{app.location}</td>
-                      <td>{new Date(app.appliedAt).toLocaleDateString()}</td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <Building2 size={13} className="text-muted" />
+                          <span>{app.companyName}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--slate-600)' }}>
+                          <MapPin size={13} className="text-muted" />
+                          <span>{app.location || 'Remote'}</span>
+                        </div>
+                      </td>
+                      <td>{new Date(app.appliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                       <td>
                         <StatusBadge status={app.status} type="application" />
                       </td>
@@ -129,13 +163,13 @@ const MyApplicationsPage = () => {
                             to={`/candidate/applications/${app.id}`}
                             className="btn btn-outline btn-sm"
                           >
-                            Timeline
+                            <span>Timeline</span>
+                            <ArrowRight size={13} />
                           </Link>
                           {canWithdraw && (
                             <button
                               type="button"
-                              className="btn btn-outline btn-sm"
-                              style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }}
+                              className="btn btn-danger btn-sm"
                               onClick={() => setWithdrawAppId(app.id)}
                             >
                               Withdraw
@@ -151,23 +185,25 @@ const MyApplicationsPage = () => {
           </div>
 
           {totalPages > 1 && (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem', marginTop: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem', marginTop: '1.75rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border-default)' }}>
               <button
                 className="btn btn-outline btn-sm"
                 disabled={page === 0}
                 onClick={() => fetchApplications(page - 1)}
               >
-                &larr; Prev
+                <ChevronLeft size={16} />
+                <span>Prev</span>
               </button>
-              <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                Page {page + 1} of {totalPages}
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                Page <strong>{page + 1}</strong> of <strong>{totalPages}</strong>
               </span>
               <button
                 className="btn btn-outline btn-sm"
                 disabled={page + 1 >= totalPages}
                 onClick={() => fetchApplications(page + 1)}
               >
-                Next &rarr;
+                <span>Next</span>
+                <ChevronRight size={16} />
               </button>
             </div>
           )}
@@ -178,7 +214,7 @@ const MyApplicationsPage = () => {
       <ConfirmationModal
         isOpen={!!withdrawAppId}
         title="Withdraw Application?"
-        message="Are you sure you want to withdraw this application? The hiring team will be notified, and you will not be able to reactivate this specific submission."
+        message="Are you sure you want to withdraw this application? The hiring manager will be notified and your submission will be archived."
         confirmText="Yes, Withdraw"
         confirmVariant="danger"
         isLoading={withdrawing}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { MapPin, Briefcase, Clock, Calendar, ArrowRight, Building2 } from 'lucide-react';
 import StatusBadge from '../common/StatusBadge';
 import './JobCard.css';
 
@@ -7,7 +8,7 @@ const JobCard = ({ job }) => {
   if (!job) return null;
 
   const formatSalary = (min, max) => {
-    if (!min && !max) return 'Salary undisclosed';
+    if (!min && !max) return 'Salary Undisclosed';
     const formatter = new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
@@ -22,44 +23,60 @@ const JobCard = ({ job }) => {
     ? job.skillsRequired.split(',').map((s) => s.trim()).filter(Boolean)
     : [];
 
+  const companyInitial = job.companyName
+    ? job.companyName.charAt(0).toUpperCase()
+    : 'C';
+
+  // Format relative or date string
+  const formatPostDate = (dateStr) => {
+    if (!dateStr) return 'Recently';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+    if (diffDays <= 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 30) return `${diffDays}d ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
   return (
-    <div className="job-card card">
-      <div className="job-card-header">
+    <div className="job-card card card-hover">
+      <div className="job-card-top">
+        <div className="job-company-avatar" aria-hidden="true">
+          {companyInitial}
+        </div>
         <div className="job-title-group">
           <h3 className="job-card-title">
             <Link to={`/jobs/${job.id}`}>{job.title}</Link>
           </h3>
-          <p className="job-card-company">{job.companyName || 'Confidential'}</p>
+          <div className="job-card-company">
+            <Building2 size={13} className="inline-icon" />
+            <span>{job.companyName || 'Confidential Employer'}</span>
+          </div>
         </div>
-        <StatusBadge status={job.status} />
+        <div className="job-badge-wrap">
+          <StatusBadge status={job.status} />
+        </div>
       </div>
 
       <div className="job-card-meta">
-        <span className="meta-pill">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-            <circle cx="12" cy="10" r="3"></circle>
-          </svg>
-          {job.location}
+        <span className="meta-pill" title="Job Location">
+          <MapPin size={13} />
+          <span>{job.location}</span>
         </span>
-        <span className="meta-pill">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-          </svg>
-          {job.jobType?.replace('_', ' ')}
+        <span className="meta-pill" title="Employment Type">
+          <Briefcase size={13} />
+          <span>{job.jobType?.replace(/_/g, ' ')}</span>
         </span>
-        <span className="meta-pill">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-          </svg>
-          {job.experienceLevel?.replace('_', ' ')}
+        <span className="meta-pill" title="Experience Level">
+          <Clock size={13} />
+          <span>{job.experienceLevel?.replace(/_/g, ' ')}</span>
         </span>
       </div>
 
       <div className="job-card-salary">
-        <strong>{formatSalary(job.salaryMin, job.salaryMax)}</strong>
+        <span className="salary-label">Compensation</span>
+        <span className="salary-amount">{formatSalary(job.salaryMin, job.salaryMax)}</span>
       </div>
 
       {skillsList.length > 0 && (
@@ -75,12 +92,14 @@ const JobCard = ({ job }) => {
         </div>
       )}
 
-      <div className="job-card-actions">
+      <div className="job-card-footer">
         <span className="job-posted-time">
-          Posted {new Date(job.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+          <Calendar size={13} />
+          <span>Posted {formatPostDate(job.createdAt)}</span>
         </span>
-        <Link to={`/jobs/${job.id}`} className="btn btn-outline btn-sm">
-          View Details &rarr;
+        <Link to={`/jobs/${job.id}`} className="btn btn-outline btn-sm job-action-btn">
+          <span>View Details</span>
+          <ArrowRight size={14} />
         </Link>
       </div>
     </div>

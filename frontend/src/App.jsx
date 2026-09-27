@@ -30,15 +30,19 @@ import JobManagementPage from './pages/admin/JobManagementPage';
 
 function NotFoundPage() {
   return (
-    <div className="container" style={{ padding: '5rem 1rem', textAlign: 'center' }}>
-      <div className="card card-body" style={{ maxWidth: '480px', margin: '0 auto', padding: '3rem 2rem' }}>
-        <h1 style={{ fontSize: '3.5rem', fontWeight: 900, color: 'var(--primary)', marginBottom: '0.5rem' }}>404</h1>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Page Not Found</h2>
-        <p className="text-muted" style={{ marginBottom: '2rem' }}>
-          The requested URL does not exist or may have been relocated.
+    <div className="container" style={{ padding: '5rem 1.5rem', textAlign: 'center' }}>
+      <div className="card card-body" style={{ maxWidth: '500px', margin: '0 auto', padding: '3.5rem 2rem', boxShadow: 'var(--shadow-lg)' }}>
+        <div style={{ fontSize: '4.5rem', fontWeight: 900, color: 'var(--primary-600)', lineHeight: 1, letterSpacing: '-0.04em', marginBottom: '0.5rem' }}>
+          404
+        </div>
+        <h2 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--slate-950)', marginBottom: '0.75rem' }}>
+          Page Not Found
+        </h2>
+        <p className="text-muted" style={{ marginBottom: '2rem', fontSize: '0.925rem', lineHeight: 1.6 }}>
+          The link you navigated to might be broken, expired, or the page may have been moved to another location.
         </p>
-        <a href="/" className="btn btn-primary">
-          Return to Home
+        <a href="/" className="btn btn-primary" style={{ padding: '0.75rem 1.75rem' }}>
+          Return to Platform Home
         </a>
       </div>
     </div>

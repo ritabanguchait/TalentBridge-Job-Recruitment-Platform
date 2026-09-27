@@ -126,7 +126,7 @@ public class RecruiterServiceImpl implements RecruiterService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public RecruiterDashboardStats getDashboardStats(Long recruiterUserId) {
         RecruiterProfile profile = getRecruiterProfile(recruiterUserId);
         Long profileId = profile.getId();

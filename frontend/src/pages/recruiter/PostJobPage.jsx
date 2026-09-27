@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { 
+  ArrowLeft, 
+  Briefcase, 
+  MapPin, 
+  IndianRupee, 
+  Code, 
+  FileText, 
+  Save, 
+  AlertCircle,
+  CheckCircle2
+} from 'lucide-react';
 import jobService from '../../services/jobService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
@@ -95,57 +106,79 @@ const PostJobPage = () => {
 
   if (loading) {
     return (
-      <div className="container" style={{ padding: '3.5rem 1rem' }}>
+      <div className="container" style={{ padding: '3.5rem 1.5rem' }}>
         <LoadingSpinner text="Loading position information..." />
       </div>
     );
   }
 
   return (
-    <div className="container" style={{ padding: '2.5rem 1rem', maxWidth: '800px' }}>
+    <div className="container" style={{ padding: '2.5rem 1.5rem', maxWidth: '820px' }}>
       <div style={{ marginBottom: '1.5rem' }}>
-        <Link to="/recruiter/jobs" className="btn btn-outline btn-sm">
-          &larr; Back to Job Management
+        <Link to="/recruiter/jobs" className="btn btn-outline btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem' }}>
+          <ArrowLeft size={14} />
+          <span>Manage Jobs</span>
         </Link>
       </div>
 
-      <div className="card card-body" style={{ padding: '2.5rem' }}>
-        <div style={{ marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--navy-900)' }}>
-            {isEditing ? 'Edit Job Posting' : 'Create New Job Posting'}
+      <div className="page-header" style={{ marginBottom: '1.5rem' }}>
+        <div className="page-header-content">
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--primary-600)', marginBottom: '0.35rem' }}>
+            <span>Recruiter</span>
+            <span>&bull;</span>
+            <span>{isEditing ? 'Modify Opening' : 'New Listing'}</span>
+          </div>
+          <h1 className="page-title">
+            {isEditing ? 'Edit Job Posting' : 'Publish New Job Posting'}
           </h1>
-          <p className="text-muted">
+          <p className="page-subtitle">
             {isEditing
-              ? 'Update the criteria, salary range, or status for this position.'
-              : 'Publish an open role to attract candidates across our platform.'}
+              ? 'Update the criteria, salary bracket, or status for this position.'
+              : 'Publish an open role to attract engineering candidates across our platform.'}
           </p>
         </div>
+      </div>
 
-        {errorMessage && (
-          <div className="alert alert-error" style={{ marginBottom: '1.5rem' }}>
-            {errorMessage}
-          </div>
-        )}
+      {errorMessage && (
+        <div className="alert alert-error" style={{ marginBottom: '1.75rem' }}>
+          <AlertCircle size={18} style={{ flexShrink: 0 }} />
+          <span>{errorMessage}</span>
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
+        {/* Section 1: Role Overview */}
+        <div className="card card-body" style={{ padding: '2rem', marginBottom: '1.5rem' }}>
+          <h2 style={{ fontSize: '1.15rem', color: 'var(--slate-900)', marginBottom: '1.25rem' }}>
+            Role Specifications
+          </h2>
+
           <div className="form-group">
-            <label className="form-label" htmlFor="title">Job Title *</label>
-            <input
-              id="title"
-              name="title"
-              type="text"
-              className="form-input"
-              placeholder="e.g. Junior Java Full-Stack Developer"
-              value={formData.title}
-              onChange={handleChange}
-              required
-              maxLength={150}
-            />
+            <label className="form-label" htmlFor="title">
+              Job Title *
+            </label>
+            <div style={{ position: 'relative' }}>
+              <input
+                id="title"
+                name="title"
+                type="text"
+                className="form-input"
+                style={{ paddingLeft: '2.25rem' }}
+                placeholder="e.g. Senior Java Backend Engineer"
+                value={formData.title}
+                onChange={handleChange}
+                required
+                maxLength={150}
+              />
+              <Briefcase size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)' }} />
+            </div>
           </div>
 
           <div className="grid-2">
             <div className="form-group">
-              <label className="form-label" htmlFor="jobType">Employment Type *</label>
+              <label className="form-label" htmlFor="jobType">
+                Employment Type *
+              </label>
               <select
                 id="jobType"
                 name="jobType"
@@ -162,7 +195,9 @@ const PostJobPage = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label" htmlFor="experienceLevel">Experience Level *</label>
+              <label className="form-label" htmlFor="experienceLevel">
+                Experience Level *
+              </label>
               <select
                 id="experienceLevel"
                 name="experienceLevel"
@@ -177,26 +212,41 @@ const PostJobPage = () => {
               </select>
             </div>
           </div>
+        </div>
+
+        {/* Section 2: Location & Compensation */}
+        <div className="card card-body" style={{ padding: '2rem', marginBottom: '1.5rem' }}>
+          <h2 style={{ fontSize: '1.15rem', color: 'var(--slate-900)', marginBottom: '1.25rem' }}>
+            Location & Compensation
+          </h2>
 
           <div className="grid-2">
             <div className="form-group">
-              <label className="form-label" htmlFor="location">Job Location *</label>
-              <input
-                id="location"
-                name="location"
-                type="text"
-                className="form-input"
-                placeholder="e.g. Bangalore / Remote"
-                value={formData.location}
-                onChange={handleChange}
-                required
-                maxLength={120}
-              />
+              <label className="form-label" htmlFor="location">
+                Job Location *
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  id="location"
+                  name="location"
+                  type="text"
+                  className="form-input"
+                  style={{ paddingLeft: '2.25rem' }}
+                  placeholder="e.g. Bangalore, India (or Remote)"
+                  value={formData.location}
+                  onChange={handleChange}
+                  required
+                  maxLength={120}
+                />
+                <MapPin size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)' }} />
+              </div>
             </div>
 
             {isEditing && (
               <div className="form-group">
-                <label className="form-label" htmlFor="status">Listing Status *</label>
+                <label className="form-label" htmlFor="status">
+                  Listing Status *
+                </label>
                 <select
                   id="status"
                   name="status"
@@ -205,7 +255,7 @@ const PostJobPage = () => {
                   onChange={handleChange}
                   required
                 >
-                  <option value="OPEN">Open (Accepting Applications)</option>
+                  <option value="OPEN">Open (Accepting Applicants)</option>
                   <option value="CLOSED">Closed (Archived)</option>
                 </select>
               </div>
@@ -214,7 +264,9 @@ const PostJobPage = () => {
 
           <div className="grid-2">
             <div className="form-group">
-              <label className="form-label" htmlFor="salaryMin">Minimum Salary (INR / Annum)</label>
+              <label className="form-label" htmlFor="salaryMin">
+                Minimum Annual Salary (INR)
+              </label>
               <input
                 id="salaryMin"
                 name="salaryMin"
@@ -222,14 +274,17 @@ const PostJobPage = () => {
                 min="0"
                 step="50000"
                 className="form-input"
-                placeholder="e.g. 500000"
+                placeholder="e.g. 600000"
                 value={formData.salaryMin}
                 onChange={handleChange}
               />
+              <small className="form-hint">E.g. 6,00,000 PA</small>
             </div>
 
             <div className="form-group">
-              <label className="form-label" htmlFor="salaryMax">Maximum Salary (INR / Annum)</label>
+              <label className="form-label" htmlFor="salaryMax">
+                Maximum Annual Salary (INR)
+              </label>
               <input
                 id="salaryMax"
                 name="salaryMax"
@@ -237,55 +292,73 @@ const PostJobPage = () => {
                 min="0"
                 step="50000"
                 className="form-input"
-                placeholder="e.g. 800000"
+                placeholder="e.g. 1200000"
                 value={formData.salaryMax}
                 onChange={handleChange}
               />
+              <small className="form-hint">E.g. 12,00,000 PA</small>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 3: Tech Stack & Description */}
+        <div className="card card-body" style={{ padding: '2rem', marginBottom: '2rem' }}>
+          <h2 style={{ fontSize: '1.15rem', color: 'var(--slate-900)', marginBottom: '1.25rem' }}>
+            Requirements & Description
+          </h2>
+
+          <div className="form-group">
+            <label className="form-label" htmlFor="skillsRequired">
+              Required Technical Skills (Comma separated)
+            </label>
+            <div style={{ position: 'relative' }}>
+              <input
+                id="skillsRequired"
+                name="skillsRequired"
+                type="text"
+                className="form-input"
+                style={{ paddingLeft: '2.25rem' }}
+                placeholder="e.g. Java 17, Spring Boot, MySQL, React, RESTful APIs, Docker"
+                value={formData.skillsRequired}
+                onChange={handleChange}
+              />
+              <Code size={16} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--slate-400)' }} />
             </div>
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="skillsRequired">Required Skills (Comma separated)</label>
-            <input
-              id="skillsRequired"
-              name="skillsRequired"
-              type="text"
-              className="form-input"
-              placeholder="e.g. Java 17, Spring Boot, MySQL, React, RESTful APIs"
-              value={formData.skillsRequired}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label" htmlFor="description">Job Description & Responsibilities *</label>
+            <label className="form-label" htmlFor="description">
+              Role Description & Key Responsibilities *
+            </label>
             <textarea
               id="description"
               name="description"
               rows="8"
-              className="form-input"
-              placeholder="Detail the daily responsibilities, qualifications, tech stack, and interview process..."
+              className="form-textarea"
+              placeholder="Outline the day-to-day responsibilities, technical expectations, team culture, and interview stages..."
               value={formData.description}
               onChange={handleChange}
               required
             />
           </div>
+        </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '2rem' }}>
-            <Link to="/recruiter/jobs" className="btn btn-outline">
-              Cancel
-            </Link>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={saving}
-              style={{ minWidth: '150px' }}
-            >
-              {saving ? 'Saving...' : isEditing ? 'Update Position' : 'Publish Job Opening'}
-            </button>
-          </div>
-        </form>
-      </div>
+        {/* Actions Bar */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+          <Link to="/recruiter/jobs" className="btn btn-outline">
+            Cancel
+          </Link>
+          <button
+            type="submit"
+            className="btn btn-primary btn-lg"
+            disabled={saving}
+            style={{ minWidth: '170px' }}
+          >
+            <Save size={16} />
+            <span>{saving ? 'Saving...' : isEditing ? 'Update Position' : 'Publish Job Opening'}</span>
+          </button>
+        </div>
+      </form>
     </div>
   );
 };

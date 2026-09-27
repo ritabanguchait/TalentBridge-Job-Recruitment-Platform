@@ -1,8 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { 
+  ArrowLeft, 
+  Filter, 
+  Building2, 
+  MapPin, 
+  Calendar, 
+  Trash2, 
+  ChevronLeft, 
+  ChevronRight, 
+  AlertCircle,
+  Briefcase 
+} from 'lucide-react';
 import adminService from '../../services/adminService';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ConfirmationModal from '../../components/common/ConfirmationModal';
+import StatusBadge from '../../components/common/StatusBadge';
 
 const JobManagementPage = () => {
   const [jobs, setJobs] = useState([]);
@@ -71,26 +84,34 @@ const JobManagementPage = () => {
   };
 
   return (
-    <div className="container" style={{ padding: '2.5rem 1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--navy-900)' }}>
-            Job Moderation & Oversight
-          </h1>
-          <p className="text-muted">
-            Audit public listings across all employers, modify availability, or remove non-compliant postings.
+    <div className="container" style={{ padding: '2.5rem 1.5rem' }}>
+      <div className="page-header">
+        <div className="page-header-content">
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--primary-600)', marginBottom: '0.35rem' }}>
+            <span>Admin</span>
+            <span>&bull;</span>
+            <span>Content Moderation</span>
+          </div>
+          <h1 className="page-title">Job Moderation & Compliance</h1>
+          <p className="page-subtitle">
+            Inspect public job postings across all registered companies, modify status, or delete non-compliant listings.
           </p>
         </div>
-        <Link to="/admin/dashboard" className="btn btn-outline btn-sm">
-          &larr; Back to Admin Dashboard
-        </Link>
+
+        <div className="page-actions">
+          <Link to="/admin/dashboard" className="btn btn-outline btn-sm">
+            <ArrowLeft size={14} />
+            <span>Admin Dashboard</span>
+          </Link>
+        </div>
       </div>
 
       {/* Filter Bar */}
-      <div className="card card-body" style={{ padding: '1rem 1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <label htmlFor="jobStatusFilter" style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--navy-900)' }}>
-          Filter by Status:
-        </label>
+      <div className="card card-body" style={{ padding: '1rem 1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', fontWeight: 600, fontSize: '0.885rem', color: 'var(--slate-800)' }}>
+          <Filter size={15} className="text-primary" />
+          <span>Filter by Status:</span>
+        </div>
         <select
           id="jobStatusFilter"
           className="form-select"
@@ -99,26 +120,27 @@ const JobManagementPage = () => {
           onChange={(e) => setStatusFilter(e.target.value)}
         >
           <option value="">All Statuses</option>
-          <option value="OPEN">Open Only</option>
-          <option value="CLOSED">Closed Only</option>
+          <option value="OPEN">Open (Accepting Applicants)</option>
+          <option value="CLOSED">Closed (Archived)</option>
         </select>
       </div>
 
       {error && (
-        <div className="alert alert-error" style={{ marginBottom: '1.5rem' }}>
-          {error}
+        <div className="alert alert-error" style={{ marginBottom: '1.75rem' }}>
+          <AlertCircle size={18} style={{ flexShrink: 0 }} />
+          <span>{error}</span>
         </div>
       )}
 
       {loading && jobs.length === 0 ? (
-        <div style={{ padding: '3.5rem 1rem' }}>
-          <LoadingSpinner text="Fetching job postings..." />
+        <div style={{ padding: '3.5rem 1.5rem' }}>
+          <LoadingSpinner text="Fetching job postings for audit..." />
         </div>
       ) : (
-        <div className="card" style={{ padding: '1.5rem' }}>
+        <div className="card" style={{ padding: '1.75rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <span className="text-muted" style={{ fontSize: '0.9rem' }}>
-              Showing {jobs.length} of {totalElements} listings
+            <span className="text-muted" style={{ fontSize: '0.875rem' }}>
+              Showing <strong>{jobs.length}</strong> of <strong>{totalElements}</strong> job listings
             </span>
           </div>
 
@@ -130,7 +152,7 @@ const JobManagementPage = () => {
                   <th>Job Title</th>
                   <th>Company</th>
                   <th>Location</th>
-                  <th>Status</th>
+                  <th>Listing Status</th>
                   <th>Created Date</th>
                   <th style={{ textAlign: 'right' }}>Moderation Actions</th>
                 </tr>
@@ -138,22 +160,30 @@ const JobManagementPage = () => {
               <tbody>
                 {jobs.map((job) => (
                   <tr key={job.id}>
-                    <td>#{job.id}</td>
+                    <td style={{ color: 'var(--slate-500)', fontSize: '0.8rem' }}>#{job.id}</td>
                     <td style={{ fontWeight: 600 }}>
-                      <Link to={`/jobs/${job.id}`} style={{ color: 'var(--navy-900)' }}>
+                      <Link to={`/jobs/${job.id}`} style={{ color: 'var(--slate-900)' }}>
                         {job.title}
                       </Link>
                     </td>
-                    <td>{job.companyName}</td>
-                    <td>{job.location}</td>
                     <td>
-                      <span className={`badge ${job.status === 'OPEN' ? 'badge-primary' : 'badge-withdrawn'}`}>
-                        {job.status}
-                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <Building2 size={13} className="text-muted" />
+                        <span>{job.companyName}</span>
+                      </div>
                     </td>
-                    <td>{new Date(job.createdAt).toLocaleDateString()}</td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--slate-600)' }}>
+                        <MapPin size={13} className="text-muted" />
+                        <span>{job.location}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <StatusBadge status={job.status} />
+                    </td>
+                    <td>{new Date(job.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                     <td style={{ textAlign: 'right' }}>
-                      <div style={{ display: 'inline-flex', gap: '0.4rem' }}>
+                      <div style={{ display: 'inline-flex', gap: '0.45rem' }}>
                         <button
                           type="button"
                           className="btn btn-outline btn-sm"
@@ -163,11 +193,12 @@ const JobManagementPage = () => {
                         </button>
                         <button
                           type="button"
-                          className="btn btn-outline btn-sm"
-                          style={{ borderColor: 'var(--danger)', color: 'var(--danger)' }}
+                          className="btn btn-danger btn-sm"
                           onClick={() => setDeleteJobId(job.id)}
+                          title="Remove posting"
                         >
-                          Delete
+                          <Trash2 size={13} />
+                          <span>Delete</span>
                         </button>
                       </div>
                     </td>
@@ -178,23 +209,25 @@ const JobManagementPage = () => {
           </div>
 
           {totalPages > 1 && (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem', marginTop: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem', marginTop: '1.75rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border-default)' }}>
               <button
                 className="btn btn-outline btn-sm"
                 disabled={page === 0}
                 onClick={() => fetchJobs(page - 1)}
               >
-                &larr; Prev
+                <ChevronLeft size={16} />
+                <span>Prev</span>
               </button>
-              <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                Page {page + 1} of {totalPages}
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                Page <strong>{page + 1}</strong> of <strong>{totalPages}</strong>
               </span>
               <button
                 className="btn btn-outline btn-sm"
                 disabled={page + 1 >= totalPages}
                 onClick={() => fetchJobs(page + 1)}
               >
-                Next &rarr;
+                <span>Next</span>
+                <ChevronRight size={16} />
               </button>
             </div>
           )}
@@ -205,8 +238,8 @@ const JobManagementPage = () => {
       <ConfirmationModal
         isOpen={!!deleteJobId}
         title="Permanently Remove Job?"
-        message="As platform administrator, are you sure you want to remove this job posting? This action is permanent and will cascade-delete all candidate applications."
-        confirmText="Yes, Remove Job"
+        message="As platform administrator, are you sure you want to delete this job listing? This action cannot be reversed and all applicant submissions associated with this position will be purged."
+        confirmText="Confirm Permanent Deletion"
         confirmVariant="danger"
         isLoading={deleting}
         onConfirm={handleDeleteConfirm}
