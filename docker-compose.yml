@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: talentbridge-mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: talentbridge_db
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: talentbridge
+      MYSQL_PASSWORD: talentbridge
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - talentbridge-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: talentbridge-backend
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/talentbridge_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: talentbridge
+      SPRING_DATASOURCE_PASSWORD: talentbridge
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "false"
+      APP_JWT_SECRET: "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"
+      APP_JWT_EXPIRATION_MS: "86400000"
+    ports:
+      - "8080:8080"
+    networks:
+      - talentbridge-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: talentbridge-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+    networks:
+      - talentbridge-network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  talentbridge-network:
+    driver: bridge
